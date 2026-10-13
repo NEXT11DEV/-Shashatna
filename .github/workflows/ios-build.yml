@@ -1,0 +1,25 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build unsigned IPA
+        run: |
+          unzip -q Shashatna-iOS-project.zip -d unpacked-project
+          bash unpacked-project/Shashatna/scripts/build-ipa.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Shashatna-unsigned-IPA
+          path: unpacked-project/Shashatna/build/Shashatna-unsigned.ipa
+          if-no-files-found: error

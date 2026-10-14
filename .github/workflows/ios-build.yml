@@ -8,18 +8,25 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15-intel
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
-
       - name: Build unsigned IPA
+        shell: bash
         run: |
-          unzip -q Shashatna-iOS-project.zip -d unpacked-project
-          bash unpacked-project/Shashatna/scripts/build-ipa.sh
-
+          set -euo pipefail
+          if [[ -f Shashatna-iOS-project.zip ]]; then
+            unzip -q Shashatna-iOS-project.zip -d unpacked-project
+            bash unpacked-project/Shashatna/scripts/build-ipa.sh
+          elif [[ -f Shashatna/scripts/build-ipa.sh ]]; then
+            bash Shashatna/scripts/build-ipa.sh
+          else
+            bash scripts/build-ipa.sh
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: Shashatna-unsigned-IPA
-          path: unpacked-project/Shashatna/build/Shashatna-unsigned.ipa
+          path: '**/build/Shashatna-unsigned.ipa'
           if-no-files-found: error
+          retention-days: 7
